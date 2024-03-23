@@ -10,7 +10,7 @@ async def _(event):
 async def _(event):
     msg = await event.get_reply_message()
     data = msg.raw_text.split('\n')
-    stakeholder_id = Stakeholders.db.count() + 1
+    stakeholder_id = await Stakeholders.db.count() + 1
     await Stakeholders.add_stakeholder(stakeholder_id, data[1].strip(), int(data[2]), data[3].strip())
     await event.reply("Added stakeholder successfully")
 
