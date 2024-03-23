@@ -1,6 +1,7 @@
 from telethon import events
 from config import bot
-from mutualfund import Holdings, Stakeholders 
+from mutualfund import Holdings, Stakeholders
+import json
 
 @bot.on(events.NewMessage(pattern="/start"))
 async def _(event):
@@ -11,7 +12,7 @@ async def _(event):
     msg = await event.get_reply_message()
     data = msg.raw_text.split('\n')
     stakeholder_id = await Stakeholders.db.count() + 1
-    await Stakeholders.add_stakeholder(stakeholder_id, data[1].strip(), int(data[2]), data[3].strip())
+    await Stakeholders.add_stakeholder(stakeholder_id, data[0].strip(), int(data[1]), json.loads(data[2].strip()))
     await event.reply("Added stakeholder successfully")
 
 @bot.on(events.NewMessage(pattern="/update_stakeholder"))
