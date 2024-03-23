@@ -40,7 +40,7 @@ class Transactions:
 
     async def log_new_holding(coin_name, amount, avg_price):
         now = datetime.datetime.now()
-        await TransactionsDB.db.add(
+        await Transactions.db.add(
             {
                 "type": "Holdings",
                 "action": "Create",
@@ -51,7 +51,7 @@ class Transactions:
 
     async def log_update_holding(coin_name, old_amount, new_amount, old_avg, new_avg):
         now = datetime.datetime.now()
-        await TransactionsDB.db.add(
+        await Transactions.db.add(
             {
                 "type": "Holdings",
                 "action": "Update",
@@ -62,7 +62,7 @@ class Transactions:
 
     async def log_close_holding(coin_name, selling_price):
         now = datetime.datetime.now()
-        await TransactionsDB.db.add(
+        await Transactions.db.add(
             {
                 "type": "Holdings",
                 "action": "Close",
