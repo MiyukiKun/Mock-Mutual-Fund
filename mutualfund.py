@@ -7,7 +7,7 @@ class Transactions:
 
     async def log_new_stakeholder(stakeholder_id, name, investment, profit_shares):
         now = datetime.datetime.now() # format:  "%Y-%m-%d %H:%M:%S.%f"
-        Transactions.db.add(
+        await Transactions.db.add(
             {
                 "type": "StakeHolders",
                 "action": "Create",
@@ -18,7 +18,7 @@ class Transactions:
     
     async def log_update_stakeholder(stakeholder_id, old_investment, new_investment, old_profit_shares, new_profit_shares):
         now = datetime.datetime.now()
-        Transactions.db.add(
+        await Transactions.db.add(
             {
                 "type": "StakeHolders",
                 "action": "Update",
@@ -29,7 +29,7 @@ class Transactions:
 
     async def log_remove_stakeholder(stakeholder_id):
         now = datetime.datetime.now()
-        Transactions.db.add(
+        await Transactions.db.add(
             {
                 "type": "Stakeholders",
                 "action": "Remove",
@@ -40,7 +40,7 @@ class Transactions:
 
     async def log_new_holding(coin_name, amount, avg_price):
         now = datetime.datetime.now()
-        TransactionsDB.db.add(
+        await TransactionsDB.db.add(
             {
                 "type": "Holdings",
                 "action": "Create",
@@ -51,7 +51,7 @@ class Transactions:
 
     async def log_update_holding(coin_name, old_amount, new_amount, old_avg, new_avg):
         now = datetime.datetime.now()
-        TransactionsDB.db.add(
+        await TransactionsDB.db.add(
             {
                 "type": "Holdings",
                 "action": "Update",
@@ -62,7 +62,7 @@ class Transactions:
 
     async def log_close_holding(coin_name, selling_price):
         now = datetime.datetime.now()
-        TransactionsDB.db.add(
+        await TransactionsDB.db.add(
             {
                 "type": "Holdings",
                 "action": "Close",
@@ -73,7 +73,7 @@ class Transactions:
 
     async def log_profit_loss(profit_loss):
         now = datetime.datetime.now()
-        Transactions.db.add(
+        await Transactions.db.add(
             {
                 "type": "Profit/Loss",
                 "action": "Profit" if profit_loss > 0 else "Loss",
@@ -150,7 +150,7 @@ class Holdings:
         await Holdings.db.remove({"coin_name": coin_name})
         await Transactions.log_close_holding(coin_name, selling_price)
         profit_loss = (selling_price - holding['avg_price']) * holding['amount']
-        Holdings.split_profits(profit_loss)
+        await Holdings.split_profits(profit_loss)
 
     async def reduce_holding(coin_name, reduction_amount, selling_price):
         holding = await Holdings.db.find({"coin_name": coin_name})
@@ -158,7 +158,7 @@ class Holdings:
         await Holdings.update_holding(coin_name, new_amount, holding['avg_price'])
         await Transactions.log_update_holding(coin_name, holding["amount"], new_amount, holding["avg_price"], holding["avg_price"])
         profit_loss = (selling_price - holding['avg_price']) * reduction_amount
-        Holdings.split_profits(profit_loss)
+        await Holdings.split_profits(profit_loss)
 
     async def split_profits(profit_loss):
         stakeholders = await Stakeholders.get_all_stakeholders()
@@ -174,9 +174,9 @@ class Holdings:
 
         await Transactions.log_profit_loss(profit_loss)
         for shid, value in final_profits.items():
-            sh = Stakeholders.get_stakeholder_by_id(shid)
+            sh = await Stakeholders.get_stakeholder_by_id(shid)
             new_investment = sh["investment"] + (profit_loss * value / total_principal)
-            Stakeholders.update_stakeholder(shid, new_investment)
+            await Stakeholders.update_stakeholder(shid, new_investment)
 
     async def get_all_holdings():
         return await Holdings.db.full()
